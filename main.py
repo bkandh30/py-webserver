@@ -1,4 +1,5 @@
 import socket
+import threading
 
 def parse_request(request_data):
     lines = request_data.split('\r\n')
@@ -36,8 +37,8 @@ def main():
 
             print(f"Connection from {addr} has been established")
 
-            handle_request(client_socket)
-            client_socket.close()
+            client_handler = threading.Thread(target=handle_request, args=(client_socket,))
+            client_handler.start()
     except KeyboardInterrupt:
         print("\nServer is shutting down")
     finally:
