@@ -1,5 +1,6 @@
 import socket
 import threading
+import sys
 
 def parse_request(request_data):
     lines = request_data.split('\r\n')
@@ -13,6 +14,16 @@ def get_response(path,headers):
     elif path.startswith("/echo/"):
         value = path.split("/echo/")[1]
         response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(value)}\r\n\r\n{value}".encode()
+    elif path.startswith("/files"):
+        directory = sys.argv[2]
+        filename = path[7:]
+        print(directory, filename)
+        try:
+            with open(f"/{directory}/{filename}", "r") as f:
+                body = f.read()
+            response = f"HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: {len(body)}\r\n\r\n{body}".encode()
+        except Exception as e:
+            response = f"HTTP/1.1 404 Not Found\r\n\r\n".encode()
     elif path == "/user-agent":
         user_agent = headers.get("User-Agent", "")
         response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}"
