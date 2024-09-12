@@ -6,16 +6,18 @@ def parse_request(request_data):
     method, path, version = start_line(' ')
     return method, path, version
 
-def get_response(path):
+def get_response(path,headers):
     if path == "/":
         response = b"HTTP/1.1 404 Not Found\r\n\r\n"
     elif path.startswith("/echo/"):
         value = path.split("/echo/")[1]
         response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(value)}\r\n\r\n{value}".encode()
+    elif path == "/user-agent":
+        user_agent = headers.get("User-Agent", "")
+        response = f"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {len(user_agent)}\r\n\r\n{user_agent}"
     else:
         response = b"HTTP/1.1 404 Not Found\r\n\r\n"
     return response
-
 
 def handle_request(client_socket):
     client_socket.recv(1024)
